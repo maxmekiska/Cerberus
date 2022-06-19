@@ -14,6 +14,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
 
+
 class BasicMultStepVar:
     '''Implements deep neural networks based on multivariate multipstep predictors.
 
@@ -56,7 +57,14 @@ class BasicMultStepVar:
         load_model(self, location: str):
             Load model from location specified.
     '''
-    def __init__(self, steps_past: int, steps_future: int, data = pd.DataFrame(), features = [], scale: str = 'standard') -> object:
+
+    def __init__(
+            self,
+            steps_past: int,
+            steps_future: int,
+            data=pd.DataFrame(),
+            features=[],
+            scale: str = 'standard') -> object:
         '''
             Parameters:
                 steps_past (int): Steps predictor will look backward.
@@ -70,12 +78,12 @@ class BasicMultStepVar:
         elif scale == 'maxabs':
             self.scaler = MaxAbsScaler()
 
-        self.model_id = '' # to identify model (example: name)
-
+        self.model_id = ''  # to identify model (example: name)
 
         if len(data) > 0:
             self.data = self.__data_prep(data, features)
-            self.input_x, self.input_y = self.__multistep_prep(self.data, steps_past, steps_future)
+            self.input_x, self.input_y = self.__multistep_prep(
+                self.data, steps_past, steps_future)
         else:
             self.data = data
 
@@ -100,7 +108,11 @@ class BasicMultStepVar:
 
         return scaled
 
-    def __sequence_prep(self, input_sequence: array, steps_past: int, steps_future: int) -> [(array, array)]:
+    def __sequence_prep(self,
+                        input_sequence: array,
+                        steps_past: int,
+                        steps_future: int) -> [(array,
+                                                array)]:
         '''Prepares data input into X and y sequences. Lenght of the X sequence is dertermined by steps_past while the length of y is determined by steps_future. In detail, the predictor looks at sequence X and predicts sequence y.
                 Parameters:
                     input_sequence (array): Sequence that contains time series in array format
@@ -116,7 +128,8 @@ class BasicMultStepVar:
         X = []
         y = []
         if length <= steps_past:
-            raise ValueError('Input sequence is equal to or shorter than steps to look backwards')
+            raise ValueError(
+                'Input sequence is equal to or shorter than steps to look backwards')
         if steps_future <= 0:
             raise ValueError('Steps in the future need to be bigger than 0')
 
@@ -124,16 +137,21 @@ class BasicMultStepVar:
             last = i + steps_past
             if last > length - steps_future:
                 X.append(input_sequence[i:last])
-                y.append(input_sequence[last-1:last-1 + steps_future])
+                y.append(input_sequence[last - 1:last - 1 + steps_future])
                 break
             X.append(input_sequence[i:last])
-            y.append(input_sequence[last-1:last-1 + steps_future]) # modification to use correct target y sequence
+            # modification to use correct target y sequence
+            y.append(input_sequence[last - 1:last - 1 + steps_future])
         y = array(y)
         X = array(X)
         X = X.reshape((X.shape[0], X.shape[1], 1))
         return X, y
 
-    def __multistep_prep(self, input_sequence: array, steps_past: int, steps_future: int) -> [(array, array)]:
+    def __multistep_prep(self,
+                         input_sequence: array,
+                         steps_past: int,
+                         steps_future: int) -> [(array,
+                                                 array)]:
         '''This function prepares input sequences into a suitable input format for a multivariate multistep model. The first seqeunce in the array needs to be the target variable y.
                 Parameters:
                     input_sequence (array): Sequence that contains time series in array format
@@ -146,14 +164,16 @@ class BasicMultStepVar:
         X = []
         Y = []
         for i in range(len(input_sequence)):
-            if i ==0: # target variable should be first sequence
-                _, y = self.__sequence_prep(input_sequence[0], steps_past, steps_future)
+            if i == 0:  # target variable should be first sequence
+                _, y = self.__sequence_prep(
+                    input_sequence[0], steps_past, steps_future)
                 Y.append(y)
-                continue # skip since target column not requiered in X array
-            x, _ = self.__sequence_prep(input_sequence[i], steps_past, steps_future)
+                continue  # skip since target column not requiered in X array
+            x, _ = self.__sequence_prep(
+                input_sequence[i], steps_past, steps_future)
             X.append(x)
         X = dstack(X)
-        Y = Y[0] # getting array out of list
+        Y = Y[0]  # getting array out of list
         return X, Y
 
     def set_model_id(self, name: str):
@@ -192,14 +212,20 @@ class BasicMultStepVar:
 
         self.dimension = (self.input_x.shape[1] * self.input_x.shape[2])
 
-        self.input_x = self.input_x.reshape((self.input_x.shape[0], self.dimension)) # necessary to account for different shape input for MLP compared to the other models.
+        # necessary to account for different shape input for MLP compared to
+        # the other models.
+        self.input_x = self.input_x.reshape(
+            (self.input_x.shape[0], self.dimension))
 
         self.model = keras.Sequential()
-        self.model.add(Dense(50, activation='relu', input_dim = self.dimension))
+        self.model.add(Dense(50, activation='relu', input_dim=self.dimension))
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(
+            optimizer=optimizer,
+            loss='mean_squared_error',
+            metrics=['mean_squared_error'])
 
     def create_lstm(self, optimizer: str = 'adam'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
@@ -207,11 +233,21 @@ class BasicMultStepVar:
         self.set_model_id('LSTM')
 
         self.model = keras.Sequential()
-        self.model.add(LSTM(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(
+            LSTM(
+                40,
+                activation='relu',
+                return_sequences=True,
+                input_shape=(
+                    self.input_x.shape[1],
+                    self.input_x.shape[2])))
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(
+            optimizer=optimizer,
+            loss='mean_squared_error',
+            metrics=['mean_squared_error'])
 
     def create_cnn(self, optimizer: str = 'adam'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
@@ -219,13 +255,23 @@ class BasicMultStepVar:
         self.set_model_id('CNN')
 
         self.model = keras.Sequential()
-        self.model.add(Conv1D(filters=64, kernel_size=1, activation='relu', input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(
+            Conv1D(
+                filters=64,
+                kernel_size=1,
+                activation='relu',
+                input_shape=(
+                    self.input_x.shape[1],
+                    self.input_x.shape[2])))
         self.model.add(Conv1D(filters=32, kernel_size=1, activation='relu'))
         self.model.add(MaxPooling1D(pool_size=2))
         self.model.add(Flatten())
         self.model.add(Dense(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(
+            optimizer=optimizer,
+            loss='mean_squared_error',
+            metrics=['mean_squared_error'])
 
     def create_bilstm(self, optimizer: str = 'adam'):
         '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
@@ -233,18 +279,40 @@ class BasicMultStepVar:
         self.set_model_id('Bidirectional LSTM')
 
         self.model = keras.Sequential()
-        self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(
+            Bidirectional(
+                LSTM(
+                    50,
+                    activation='relu',
+                    return_sequences=True),
+                input_shape=(
+                    self.input_x.shape[1],
+                    self.input_x.shape[2])))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(
+            optimizer=optimizer,
+            loss='mean_squared_error',
+            metrics=['mean_squared_error'])
 
-    def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
+    def fit_model(
+            self,
+            epochs: int,
+            show_progress: int = 1,
+            validation_split: float = 0.20,
+            batch_size: int = 10):
         '''Trains the model on data provided. Performs validation.
             Parameters:
                 epochs (int): Number of epochs to train the model.
                 show_progress (int): Prints training progress.
         '''
-        self.details = self.model.fit(self.input_x, self.input_y, validation_split=validation_split, batch_size = batch_size, epochs = epochs, verbose=show_progress)
+        self.details = self.model.fit(
+            self.input_x,
+            self.input_y,
+            validation_split=validation_split,
+            batch_size=batch_size,
+            epochs=epochs,
+            verbose=show_progress)
         return self.details
 
     def model_blueprint(self):
@@ -276,7 +344,7 @@ class BasicMultStepVar:
         '''
         try:
             data = self.scaler.transform(data)
-        except:
+        except BaseException:
             if scale == 'standard':
                 scaler = StandardScaler()
             elif scale == 'minmax':
@@ -286,16 +354,15 @@ class BasicMultStepVar:
             scaler.fit(data)
             data = scaler.transform(data)
 
-
-
-        dimension = (data.shape[0] * data.shape[1]) # MLP case
+        dimension = (data.shape[0] * data.shape[1])  # MLP case
 
         try:
-            data = data.reshape((1, data.shape[0], data.shape[1])) # All other models
+            data = data.reshape(
+                (1, data.shape[0], data.shape[1]))  # All other models
             y_pred = self.model.predict(data, verbose=0)
 
-        except:
-            data = data.reshape((1, dimension)) # MLP case
+        except BaseException:
+            data = data.reshape((1, dimension))  # MLP case
             y_pred = self.model.predict(data, verbose=0)
 
         y_pred = y_pred.reshape(y_pred.shape[1], y_pred.shape[0])
