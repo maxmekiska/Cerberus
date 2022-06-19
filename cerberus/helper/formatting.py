@@ -1,6 +1,8 @@
 from pandas import DataFrame
 
-def pred_input(stockdatapred: DataFrame, steps_past: int, target: str, steps_future: int = 0) -> [(array, DataFrame)]:
+
+def pred_input(stockdatapred: DataFrame, steps_past: int,
+               target: str, steps_future: int = 0) -> [(array, DataFrame)]:
     '''Helper function to prepare data input to enable model to make future predictions. Furthermore, provides real values.
        Mainly for testing model performances.
         Parameters:
@@ -16,7 +18,7 @@ def pred_input(stockdatapred: DataFrame, steps_past: int, target: str, steps_fut
     realvalues = data[target]
     data = stockdatapred.drop(target, axis=1)
     data = stockdatapred.iloc[0:steps_past]
-    realvalues = realvalues.iloc[steps_past:steps_past+steps_future]
+    realvalues = realvalues.iloc[steps_past:steps_past + steps_future]
     X = []
     for i in range(len(data)):
         X.append(list(data.iloc[i]))
