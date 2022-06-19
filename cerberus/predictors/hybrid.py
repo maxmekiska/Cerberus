@@ -19,10 +19,18 @@ class HybridMultStepVar:
 
         Methods
         -------
-        _sequence_prep(input_sequence: array, steps_past: int, steps_future: int) -> [(array, array, int)]:
+        __sequence_prep(input_sequence: array, steps_past: int, steps_future: int) -> [(array, array, int)]:
             Private method to prepare data for predictor ingestion.
         set_model_id(self, name: str):
             Setter method to change model id name.
+        get_X_input(self) -> array:
+            Get transformed feature data.
+        get_X_input_shape(self) -> tuple:
+            Get shape of transformed feature data.
+        get_y_input(self) -> array:
+            Get transformed target data.
+        get_y_input(self) -> tuple:
+            Get shape of transformed target data.
         create_cnnlstm(self):
             Builds CNN-LSTM structure.
         fit_model(self, epochs: int, show_progress: int = 1):
@@ -150,25 +158,25 @@ class HybridMultStepVar:
         self.model_id = name
 
     @property
-    def get_X_input(self):
+    def get_X_input(self) -> array:
         '''Get transformed feature data.
         '''
         return self.input_x
 
     @property
-    def get_X_input_shape(self):
+    def get_X_input_shape(self) -> tuple:
         '''Get shape fo transformed feature data.
         '''
         return self.input_x.shape
 
     @property
-    def get_y_input(self):
+    def get_y_input(self) -> array:
         '''Get transformed target data.
         '''
         return self.input_y
 
     @property
-    def get_y_input_shape(self):
+    def get_y_input_shape(self) -> tuple:
         '''Get shape fo transformed target data.
         '''
         return self.input_y.shape
