@@ -14,7 +14,6 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
 
-
 class BasicMultStepVar:
     '''Implements deep neural networks based on multivariate multipstep predictors.
 
