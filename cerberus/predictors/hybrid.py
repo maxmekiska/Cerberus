@@ -1,3 +1,5 @@
+from .abstract_multivariate import MultiVariateStep
+
 import matplotlib.pyplot as plt
 from numpy import array
 from numpy import reshape
@@ -14,24 +16,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, TimeDistributed
 
-
-class HybridMultStepVar:
+class HybridMultStepVar(MultiVariateStep):
     '''Implements neural network based univariate multipstep hybrid predictors.
 
         Methods
         -------
-        __sequence_prep(input_sequence: array, steps_past: int, steps_future: int) -> [(array, array, int)]:
+        _sequence_prep(input_sequence: array, steps_past: int, steps_future: int) -> [(array, array, int)]:
             Private method to prepare data for predictor ingestion.
         set_model_id(self, name: str):
             Setter method to change model id name.
-        get_X_input(self) -> array:
-            Get transformed feature data.
-        get_X_input_shape(self) -> tuple:
-            Get shape of transformed feature data.
-        get_y_input(self) -> array:
-            Get transformed target data.
-        get_y_input(self) -> tuple:
-            Get shape of transformed target data.
         create_cnnlstm(self):
             Builds CNN-LSTM structure.
         fit_model(self, epochs: int, show_progress: int = 1):
@@ -47,15 +40,7 @@ class HybridMultStepVar:
         load_model(self, location: str):
             Load model from location specified.
     '''
-
-    def __init__(
-            self,
-            sub_seq: int,
-            steps_past: int,
-            steps_future: int,
-            data=pd.DataFrame(),
-            features: list = [],
-            scale: str = 'standard') -> object:
+    def __init__(self, sub_seq: int, steps_past: int, steps_future: int, data = pd.DataFrame(), features:list = [], scale: str = 'standard') -> object:
         '''
             Parameters:
                 steps_past (int): Steps predictor will look backward.
@@ -73,17 +58,17 @@ class HybridMultStepVar:
         elif scale == 'maxabs':
             self.scaler = MaxAbsScaler()
 
-        self.model_id = ''  # to identify model (example: name)
+        self.model_id = '' # to identify model (example: name)
         self.sub_seq = sub_seq
 
+
         if len(data) > 0:
-            self.data = self.__data_prep(data, features)
-            self.input_x, self.input_y, self.modified_back = self.__multistep_prep(
-                self.data, sub_seq, steps_past, steps_future)
+            self.data = self._data_prep(data, features)
+            self.input_x, self.input_y, self.modified_back = self._multistep_prep(self.data, sub_seq, steps_past, steps_future)
         else:
             self.data = data
 
-    def __data_prep(self, data: DataFrame, features: list) -> array:
+    def _data_prep(self, data: DataFrame, features: list) -> array:
         ''' Private method to extract features and convert DataFrame to an array. Extracts: Adj Close, Open, High and Low features.
                 Parameters:
                     stockdata (DataFrame): DataFrame containing multi-feature stock data.
@@ -104,13 +89,7 @@ class HybridMultStepVar:
 
         return scaled
 
-    def __sequence_prep(self,
-                        input_sequence: array,
-                        sub_seq: int,
-                        steps_past: int,
-                        steps_future: int) -> [(array,
-                                                array,
-                                                int)]:
+    def _sequence_prep(self, input_sequence: array, sub_seq: int, steps_past: int, steps_future: int) -> [(array, array, int)]:
         '''Prepares data input into X and y sequences. Lenght of the X sequence is dertermined by steps_past while the length of y is determined by steps_future. In detail, the predictor looks at sequence X and predicts sequence y.
                 Parameters:
                     input_sequence (array): Sequence that contains time series in array format
@@ -126,8 +105,7 @@ class HybridMultStepVar:
         X = []
         y = []
         if length <= steps_past:
-            raise ValueError(
-                'Input sequence is equal to or shorter than steps to look backwards')
+            raise ValueError('Input sequence is equal to or shorter than steps to look backwards')
         if steps_future <= 0:
             raise ValueError('Steps in the future need to be bigger than 0')
 
@@ -135,23 +113,17 @@ class HybridMultStepVar:
             last = i + steps_past
             if last > length - steps_future:
                 X.append(input_sequence[i:last])
-                y.append(input_sequence[last - 1:last - 1 + steps_future])
+                y.append(input_sequence[last-1:last-1 + steps_future])
                 break
             X.append(input_sequence[i:last])
-            # modification to use correct target y sequence
-            y.append(input_sequence[last - 1:last - 1 + steps_future])
+            y.append(input_sequence[last-1:last-1 + steps_future]) # modification to use correct target y sequence
         y = array(y)
         X = array(X)
-        modified_back = X.shape[1] // sub_seq
+        modified_back = X.shape[1]//sub_seq
         X = X.reshape((X.shape[0], sub_seq, modified_back, 1))
-        return X, y, modified_back  # special treatment to account for sub sequence division
+        return X, y, modified_back # special treatment to account for sub sequence division
 
-    def __multistep_prep(self,
-                         input_sequence: array,
-                         sub_seq,
-                         steps_past: int,
-                         steps_future: int) -> [(array,
-                                                 array)]:
+    def _multistep_prep(self, input_sequence: array, sub_seq, steps_past: int, steps_future: int) -> [(array, array)]:
         '''This function prepares input sequences into a suitable input format for a multivariate multistep model. The first seqeunce in the array needs to be the target variable y.
                 Parameters:
                     input_sequence (array): Sequence that contains time series in array format
@@ -164,16 +136,14 @@ class HybridMultStepVar:
         X = []
         Y = []
         for i in range(len(input_sequence)):
-            if i == 0:  # target variable should be first sequence
-                _, y, _ = self.__sequence_prep(
-                    input_sequence[0], sub_seq, steps_past, steps_future)
+            if i ==0: # target variable should be first sequence
+                _, y, _ = self._sequence_prep(input_sequence[0], sub_seq, steps_past, steps_future)
                 Y.append(y)
-                continue  # skip since target column not requiered in X array
-            x, _, mod = self.__sequence_prep(
-                input_sequence[i], sub_seq, steps_past, steps_future)
+                continue # skip since target column not requiered in X array
+            x, _, mod = self._sequence_prep(input_sequence[i], sub_seq, steps_past, steps_future)
             X.append(x)
         X = dstack(X)
-        Y = Y[0]  # getting array out of list
+        Y = Y[0] # getting array out of list
         return X, Y, mod
 
     def set_model_id(self, name: str):
@@ -210,31 +180,14 @@ class HybridMultStepVar:
         '''
         self.set_model_id('CNN-LSTM')
         self.model = keras.Sequential()
-        self.model.add(
-            TimeDistributed(
-                Conv1D(
-                    filters=64,
-                    kernel_size=1,
-                    activation='relu'),
-                input_shape=(
-                    self.input_x.shape[1],
-                    self.input_x.shape[2],
-                    self.input_x.shape[3])))
-        self.model.add(
-            TimeDistributed(
-                Conv1D(
-                    filters=32,
-                    kernel_size=1,
-                    activation='relu')))
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(self.input_x.shape[1], self.input_x.shape[2], self.input_x.shape[3])))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
         self.model.add(TimeDistributed(MaxPooling1D(pool_size=1)))
         self.model.add(TimeDistributed(Flatten()))
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(
-            optimizer=optimizer,
-            loss='mean_squared_error',
-            metrics=['mean_squared_error'])
+        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
     def create_cnnbilstm(self, optimizer: str = 'adam'):
         '''Creates CNN-Bidirectional-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
@@ -242,55 +195,22 @@ class HybridMultStepVar:
         self.set_model_id('CNN-Bi-LSTM')
 
         self.model = keras.Sequential()
-        self.model.add(
-            TimeDistributed(
-                Conv1D(
-                    filters=64,
-                    kernel_size=1,
-                    activation='relu'),
-                input_shape=(
-                    self.input_x.shape[1],
-                    self.input_x.shape[2],
-                    self.input_x.shape[3])))
-        self.model.add(
-            TimeDistributed(
-                Conv1D(
-                    filters=32,
-                    kernel_size=1,
-                    activation='relu')))
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(self.input_x.shape[1], self.input_x.shape[2], self.input_x.shape[3])))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
         self.model.add(TimeDistributed(MaxPooling1D(pool_size=1)))
         self.model.add(TimeDistributed(Flatten()))
-        self.model.add(
-            Bidirectional(
-                LSTM(
-                    50,
-                    activation='relu',
-                    return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True)))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(
-            optimizer='adam',
-            loss='mean_squared_error',
-            metrics=['mean_squared_error'])
+        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def fit_model(
-            self,
-            epochs: int,
-            show_progress: int = 1,
-            validation_split: float = 0.20,
-            batch_size: int = 10):
+    def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
         '''Trains the model on data provided. Perfroms validation.
             Parameters:
                 epochs (int): Number of epochs to train the model.
                 show_progress (int): Prints training progress.
         '''
-        self.details = self.model.fit(
-            self.input_x,
-            self.input_y,
-            validation_split=0.20,
-            batch_size=10,
-            epochs=epochs,
-            verbose=show_progress)
+        self.details = self.model.fit(self.input_x, self.input_y, validation_split=0.20, batch_size = 10, epochs = epochs, verbose=show_progress)
         return self.details
 
     def model_blueprint(self):
@@ -322,7 +242,7 @@ class HybridMultStepVar:
         '''
         try:
             data = self.scaler.transform(data)
-        except BaseException:
+        except:
             if scale == 'standard':
                 scaler = StandardScaler()
             elif scale == 'minmax':
@@ -333,7 +253,7 @@ class HybridMultStepVar:
             data = scaler.transform(data)
 
         shape_ = int((data.shape[1] * self.steps_past) / self.sub_seq)
-        data = data.reshape(1, self.sub_seq, shape_, 1)
+        data = data.reshape(1, self.sub_seq, shape_ , 1)
 
         y_pred = self.model.predict(data, verbose=0)
 
