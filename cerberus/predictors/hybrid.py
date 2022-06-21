@@ -1,4 +1,4 @@
-from .abstract_multivariate import MultiVariateStep
+from cerberus.predictors.blueprints_predictors.abstract_multivariate import MultiVariateStep
 
 import matplotlib.pyplot as plt
 from numpy import array
