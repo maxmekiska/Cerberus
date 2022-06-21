@@ -1,4 +1,4 @@
-from .abstract_multivariate import UniVariateMultiStep
+from .abstract_univariate import UniVariateMultiStep
 
 import matplotlib.pyplot as plt
 from numpy import array
@@ -73,7 +73,6 @@ class BasicMultStepUniVar(UniVariateMultiStep):
 
         self.scaler.fit(data)
         scaled = self.scaler.transform(data)
-        print(scaled)
 
         return scaled
 
