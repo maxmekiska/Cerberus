@@ -17,6 +17,23 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, TimeDistributed
 
+import matplotlib.pyplot as plt
+from numpy import array
+from numpy import reshape
+import pandas as pd
+from pandas import DataFrame
+import os
+
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler
+
+import pandas as pd
+from pandas import DataFrame
+import os
+
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, TimeDistributed
+
 class HybridMultStepUniVar(UniVariateMultiStep):
     '''Implements neural network based univariate multipstep hybrid predictors.
 
@@ -141,44 +158,44 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         '''
         return self.input_y.shape
 
-    def create_cnnlstm(self):
+    def create_cnnlstm(self, optimizer: str = 'adam'):
         '''Creates CNN-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN-LSTM')
 
         self.model = keras.Sequential()
-        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=2, activation='relu'), input_shape=(None,self.modified_back, 1)))
-        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=2, activation='relu')))
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
         self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
         self.model.add(TimeDistributed(Flatten()))
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
 # Experimental model
-    def create_cnnbilstm(self):
+    def create_cnnbilstm(self, optimizer: str = 'adam'):
         '''Creates CNN-Bidirectional-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN-Bi-LSTM')
 
         self.model = keras.Sequential()
-        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=2, activation='relu'), input_shape=(None,self.modified_back, 1)))
-        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=2, activation='relu')))
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
         self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
         self.model.add(TimeDistributed(Flatten()))
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True)))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def fit_model(self, epochs: int, show_progress: int = 1):
+    def fit_model(self, epochs: int, show_progress: int = 1, validation_split=0.20, batch_size = 10):
         '''Trains the model on data provided. Perfroms validation.
             Parameters:
                 epochs (int): Number of epochs to train the model.
                 show_progress (int): Prints training progress.
         '''
-        self.details = self.model.fit(self.input_x, self.input_y, validation_split=0.20, batch_size = 10, epochs = epochs, verbose=show_progress)
+        self.details = self.model.fit(self.input_x, self.input_y, validation_split=validation_split, batch_size = batch_size, epochs = epochs, verbose=show_progress)
         return self.details
 
     def model_blueprint(self):
