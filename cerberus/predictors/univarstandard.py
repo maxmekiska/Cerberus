@@ -15,6 +15,21 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
 
+import matplotlib.pyplot as plt
+from numpy import array
+from numpy import reshape
+from numpy import empty
+
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler
+
+import pandas as pd
+from pandas import DataFrame
+import os
+
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
+
 class BasicMultStepUniVar(UniVariateMultiStep):
     '''Implements neural network based univariate multipstep predictors.
 
@@ -136,7 +151,7 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         '''
         return self.input_y.shape
 
-    def create_mlp(self):
+    def create_mlp(self, optimizer: str = 'adam'):
         '''Creates MLP model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('MLP')
@@ -148,9 +163,9 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def create_lstm(self):
+    def create_lstm(self, optimizer: str = 'adam'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('LSTM')
@@ -160,23 +175,23 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def create_cnn(self):
+    def create_cnn(self, optimizer: str = 'adam'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN')
 
         self.model = keras.Sequential()
-        self.model.add(Conv1D(filters=64, kernel_size=2, activation='relu', input_shape=(self.input_x.shape[1], 1)))
-        self.model.add(Conv1D(filters=32, kernel_size=2, activation='relu'))
+        self.model.add(Conv1D(filters=64, kernel_size=1, activation='relu', input_shape=(self.input_x.shape[1], 1)))
+        self.model.add(Conv1D(filters=32, kernel_size=1, activation='relu'))
         self.model.add(MaxPooling1D(pool_size=2))
         self.model.add(Flatten())
         self.model.add(Dense(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def create_bilstm(self):
+    def create_bilstm(self, optimizer: str = 'adam'):
         '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional LSTM')
@@ -185,15 +200,15 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], 1)))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
 
-    def fit_model(self, epochs: int, show_progress: int = 1):
+    def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
         '''Trains the model on data provided. Performs validation.
             Parameters:
                 epochs (int): Number of epochs to train the model.
                 show_progress (int): Prints training progress.
         '''
-        self.details = self.model.fit(self.input_x, self.input_y, validation_split=0.20, batch_size = 10, epochs = epochs, verbose=show_progress)
+        self.details = self.model.fit(self.input_x, self.input_y, validation_split=validation_split, batch_size = batch_size, epochs = epochs, verbose=show_progress)
         return self.details
 
     def model_blueprint(self):
