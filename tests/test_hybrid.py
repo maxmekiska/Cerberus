@@ -20,7 +20,8 @@ test0 = HybridMultStepVar(
         'AveOccup',
         'Latitude',
         'Longitude',
-        'MedInc'])
+        'MedInc'],
+        scale = 'standard')
 
 X = np.array([[[0.98214266],
                [-0.60701891],

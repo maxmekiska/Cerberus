@@ -19,7 +19,8 @@ test0 = BasicMultStepVar(
         'AveOccup',
         'Latitude',
         'Longitude',
-        'MedInc'])
+        'MedInc'],
+        scale = 'standard')
 
 X = np.array([[0.98214266, 0.62855945, -0.15375759, -0.9744286, -0.04959654,
                1.05254828, -1.32783522, 2.34476576],

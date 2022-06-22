@@ -1,4 +1,4 @@
-from cerberus.predictors.blueprints_predictors.abstract_multivariate import MultiVariateStep
+from cerberus.predictors.blueprints_predictors.abstract_multivariate import MultiVariateMultiStep
 
 import matplotlib.pyplot as plt
 from numpy import array
@@ -6,7 +6,7 @@ from numpy import reshape
 from numpy import empty
 from numpy import dstack, vstack
 
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
 
 import pandas as pd
 from pandas import DataFrame
@@ -17,11 +17,13 @@ from tensorflow import keras
 from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
 
 
-class BasicMultStepVar(MultiVariateStep):
+class BasicMultStepVar(MultiVariateMultiStep):
     '''Implements deep neural networks based on multivariate multipstep predictors.
 
         Methods
         -------
+        _scaling(self, method: str) -> object:
+            Private method to scale input data.
         _data_prep(self, stockdata: DataFrame) -> array:
             Private method to extract features and convert DataFrame to an array.
         _sequence_prep(self, input_sequence: array, steps_past: int, steps_future: int) -> [(array, array)]:
@@ -51,19 +53,14 @@ class BasicMultStepVar(MultiVariateStep):
         load_model(self, location: str):
             Load model from location specified.
     '''
-    def __init__(self, steps_past: int, steps_future: int, data = pd.DataFrame(), features = [], scale: str = 'standard') -> object:
+    def __init__(self, steps_past: int, steps_future: int, data = pd.DataFrame(), features = [], scale: str = '') -> object:
         '''
             Parameters:
                 steps_past (int): Steps predictor will look backward.
                 steps_future (int): Steps predictor will look forward.
                 data (DataFrame): Input data for model training.
         '''
-        if scale == 'standard':
-            self.scaler = StandardScaler()
-        elif scale == 'minmax':
-            self.scaler = MinMaxScaler()
-        elif scale == 'maxabs':
-            self.scaler = MaxAbsScaler()
+        self.scaler = self._scaling(scale)
 
         self.model_id = '' # to identify model (example: name)
 
@@ -73,6 +70,26 @@ class BasicMultStepVar(MultiVariateStep):
             self.input_x, self.input_y = self._multistep_prep(self.data, steps_past, steps_future)
         else:
             self.data = data
+
+    def _scaling(self, method: str) -> object:
+        '''Scales data accordingly.
+            Parameters:
+                method (str): Scaling method.
+            Returns:
+                scaler (object): Returns scikit learn scaler object.
+        '''
+        if method == '':
+            scaler = FunctionTransformer(lambda x: x, validate=True)
+        elif method == 'standard':
+            scaler = StandardScaler()
+        elif method == 'minmax':
+            scaler = MinMaxScaler()
+        elif method == 'maxabs':
+            scaler = MaxAbsScaler()
+        elif method == 'normalize':
+            scaler = FunctionTransformer(lambda x: (x - x.min()) / (x.max() - x.min()), validate= True)
+
+        return scaler
 
     def _data_prep(self, data: DataFrame, features: list) -> array:
         ''' Private method to extract features and convert DataFrame to an array. Extracts: Adj Close, Open, High and Low features.
@@ -262,26 +279,15 @@ class BasicMultStepVar(MultiVariateStep):
         plt.tight_layout()
         plt.show()
 
-    def predict(self, data: array, scale: str = 'standard') -> DataFrame:
+    def predict(self, data: array) -> DataFrame:
         '''Takes in a sequence of values and outputs a forecast.
             Parameters:
                 data (array): Input sequence which needs to be forecasted.
             Returns:
                 (DataFrame): Forecast for sequence provided.
         '''
-        try:
-            data = self.scaler.transform(data)
-        except:
-            if scale == 'standard':
-                scaler = StandardScaler()
-            elif scale == 'minmax':
-                scaler = MinMaxScaler()
-            elif scale == 'maxabs':
-                scaler = MaxAbsScaler()
-            scaler.fit(data)
-            data = scaler.transform(data)
-
-
+        self.scaler.fit(data)
+        data = self.scaler.transform(data)
 
         dimension = (data.shape[0] * data.shape[1]) # MLP case
 
