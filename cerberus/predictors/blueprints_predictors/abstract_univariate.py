@@ -4,13 +4,19 @@ from pandas import DataFrame
 from numpy import array
 
 class UniVariateMultiStep(ABC):
-    
+
     @abstractmethod
     def __init__(self):
         pass
+
+    @abstractmethod
+    def _scaling(self, method: str) -> object:
+        pass
+
     @abstractmethod
     def _data_prep(self, data: DataFrame, features: list) -> array:
         pass
+
     @abstractmethod
     def _sequence_prep(self, input_sequence: array, steps_past: int, steps_future: int) -> [(array, array)]:
         pass
@@ -48,7 +54,7 @@ class UniVariateMultiStep(ABC):
         pass
 
     @abstractmethod
-    def predict(self, data: array, scale: str = 'standard') -> DataFrame:
+    def predict(self, data: array) -> DataFrame:
         pass
 
     @abstractmethod

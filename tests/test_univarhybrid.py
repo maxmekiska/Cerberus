@@ -11,7 +11,8 @@ test0 = HybridMultStepUniVar(
     2,
     10,
     3,
-    data=data)
+    data=data,
+    scale = 'standard')
 
 X = np.array([[[ 1.17289952],
                [ 0.54461086],
