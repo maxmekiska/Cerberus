@@ -1,4 +1,5 @@
 # Cerberus
+
 Standard and Hybrid Deep Learning Multivariate-Multi-Step
 (+ Univariate-Multi-Step, because why not?) Time Series Forecasting.
 
@@ -51,7 +52,9 @@ Trained models can furthermore be saved or loaded if the user wishes to do so.
 
 ## How to use?
 
-Simplified workflow, more possible.
+Simplified workflows, more possible.
+
+### Univariate Models:
 
 1. Univariate-Multistep forecasting
 
@@ -83,10 +86,50 @@ predictor.save_model()
 # Step 1: initialize a new predictor object with same characteristics as model to load
 # Step 2: Do not pass in any data
 # Step 3: Invoke the method load_model()
-# optional Step 4: Use the setter method set_model_id(self, name: str) to give model a name
+# optional Step 4: Use the setter method set_model_id(name: str) to give model a name
 
 loading_predictor = BasicMultStepUniVar(steps_past: int, steps_future: int)
 loading_predictor.load_model(location: str)
+loading_predictor.set_model_id(name: str)
 ```
+
+2. Multivariate-Multistep forecasting
+
+```python3
+from ceberus.predictors.univarhybrid import *
+
+predictor = HybridMultStepUniVar(sub_seq: int, steps_past: int, steps_future: int, data = pd.DataFrame(), scale: str = '')
+
+# Choose between one of the architectures:
+
+# predictor.create_cnnlstm(optimizer: str = 'adam')
+# predictor.create_cnnbilstm(optimizer: str = 'adam')
+
+# Fit the predictor object
+predictor.fit_model(epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10)
+
+# Have a look at the model performance - MSE based, more evaluation forms might be added on architecture level in the future
+predictor.show_performance()
+
+# Make a prediction based on new unseen data
+predictor.predict(data: array)
+
+# Safe your model:
+predictor.save_model()
+
+# Load a model:
+# Step 1: initialize a new predictor object with same characteristics as model to load
+# Step 2: Do not pass in any data
+# Step 3: Invoke the method load_model()
+# optional Step 4: Use the setter method set_model_id(name: str) to give model a name
+
+loading_predictor =  HybridMultStepUniVar(sub_seq: int, steps_past: int, steps_future: int)
+loading_predictor.load_model(location: str)
+loading_predictor.set_model_id(name: str)
+```
+
+### Multivariate Models:
+
+
 
 ... to be continued
