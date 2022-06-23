@@ -10,9 +10,6 @@ authors = [
 ]
 description = "Standard and Hybrid Deep Learning Multivariate-Multi-Step & Univariate-Multi-Step Time Series Forecasting."
 readme = "README.md"
-package_dir=
-    =src
-packages = find:
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -27,12 +24,6 @@ dependencies = [
     "numpy==1.21.6",
     "pandas==0.25.1",
 ]
-
-[options.packages.find]
-where=src
-
-[options.extras_require]
-test = unitteset
 
 [project.urls]
 "Homepage" = "https://github.com/maxmekiska/Cerberus"
