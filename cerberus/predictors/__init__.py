@@ -1,4 +1,4 @@
-from .standard import *
-from .hybrid import *
+from .multivarstandard import *
+from .multivarhybrid import *
 from .univarstandard import *
 from .univarhybrid import *

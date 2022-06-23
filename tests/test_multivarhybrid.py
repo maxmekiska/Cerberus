@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import pandas as pd
 
-from cerberus.predictors.hybrid import *
+from cerberus.predictors.multivarhybrid import *
 
 data = pd.read_csv('./exampleData/CaliforniaHousing.csv')
 
