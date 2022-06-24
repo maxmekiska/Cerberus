@@ -4,7 +4,7 @@ import pandas as pd
 
 from cerberus.predictors.univarhybrid import *
 
-data = pd.read_csv('./exampleData/CaliforniaHousing.csv')
+data = pd.read_csv('tests/example_dataset/CaliforniaHousing.csv')
 data = data['target']
 
 test0 = HybridMultStepUniVar(

@@ -4,7 +4,7 @@ import pandas as pd
 
 from cerberus.predictors.multivarhybrid import *
 
-data = pd.read_csv('./exampleData/CaliforniaHousing.csv')
+data = pd.read_csv('tests/example_dataset/CaliforniaHousing.csv')
 
 test0 = HybridMultStepVar(
     1,

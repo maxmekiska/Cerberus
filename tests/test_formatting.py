@@ -4,7 +4,7 @@ import pandas as pd
 
 from cerberus.helper.formatting import *
 
-data = pd.read_csv('./exampleData/CaliforniaHousing.csv')
+data = pd.read_csv('tests/example_dataset/CaliforniaHousing.csv')
 
 
 to_pred = data.tail(10)
