@@ -54,6 +54,8 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         self.sub_seq = sub_seq
         self.steps_past = steps_past
         self.steps_future = steps_future
+        self.loss = ''
+        self.metrics = ''
 
         self.scaler = self._scaling(scale)
 
@@ -164,10 +166,24 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         '''
         return self.input_y.shape
 
-    def create_cnnlstm(self, optimizer: str = 'adam'):
+    @property
+    def get_loss(self) -> str:
+        '''Get loss function.
+        '''
+        return self.loss
+
+    @property
+    def get_metrics(self) -> str:
+        '''Get metrics.
+        '''
+        return self.metrics
+
+    def create_cnnlstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates CNN-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN-LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
@@ -177,13 +193,15 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
 # Experimental model
-    def create_cnnbilstm(self, optimizer: str = 'adam'):
+    def create_cnnbilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates CNN-Bidirectional-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN-Bi-LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
@@ -193,7 +211,7 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True)))
         self.model.add(LSTM(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def fit_model(self, epochs: int, show_progress: int = 1, validation_split=0.20, batch_size = 10):
         '''Trains the model on data provided. Perfroms validation.
@@ -218,7 +236,7 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         plt.plot(information.history['loss'])
         plt.plot(information.history['val_loss'])
         plt.title(self.model_id + ' Model Loss')
-        plt.ylabel('MSE')
+        plt.ylabel(self.loss)
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper right')
         plt.tight_layout()

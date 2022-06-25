@@ -41,6 +41,16 @@ class UniVariateMultiStep(ABC):
     def get_y_input_shape(self) -> tuple:
         pass
 
+    @property
+    @abstractmethod
+    def get_loss(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def get_metrics(self) -> str:
+        pass
+
     @abstractmethod
     def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
         pass

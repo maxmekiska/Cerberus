@@ -55,6 +55,8 @@ class BasicMultStepUniVar(UniVariateMultiStep):
                 data (DataFrame): Input data for model training.
         '''
         self.scaler = self._scaling(scale)
+        self.loss = ''
+        self.metrics = ''
 
         if len(data) > 0:
             self.data = array(data)
@@ -159,10 +161,23 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         '''
         return self.input_y.shape
 
-    def create_mlp(self, optimizer: str = 'adam'):
+    @property
+    def get_loss(self) -> str:
+        '''Get loss function.
+        '''
+        return self.loss
+    @property
+    def get_metrics(self) -> str:
+        '''Get metrics.
+        '''
+        return self.metrics
+
+    def create_mlp(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates MLP model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('MLP')
+        self.loss = loss
+        self.metrics = metrics
 
         self.input_x = self.input_x.reshape((self.input_x.shape[0], self.input_x.shape[1])) # necessary to account for different shape input for MLP compared to the other models.
 
@@ -171,24 +186,28 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    def create_lstm(self, optimizer: str = 'adam'):
+    def create_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(LSTM(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], 1)))
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    def create_cnn(self, optimizer: str = 'adam'):
+    def create_cnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(Conv1D(filters=64, kernel_size=1, activation='relu', input_shape=(self.input_x.shape[1], 1)))
@@ -197,18 +216,20 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Flatten())
         self.model.add(Dense(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    def create_bilstm(self, optimizer: str = 'adam'):
+    def create_bilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], 1)))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
         '''Trains the model on data provided. Performs validation.
@@ -233,7 +254,7 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         plt.plot(information.history['loss'])
         plt.plot(information.history['val_loss'])
         plt.title(self.model_id + ' Model Loss')
-        plt.ylabel('MSE')
+        plt.ylabel(self.loss)
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper right')
         plt.tight_layout()
