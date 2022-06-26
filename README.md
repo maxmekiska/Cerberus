@@ -28,17 +28,17 @@ These two main modes are further divided based on the complexity of the underlyi
 
 Standard supports the following architectures:
 
-- MLP
-- LSTM
-- CNN
-- BI-LSTM
+- Multilayer Perceptron (MLP)
+- Long short-term memory (LSTM)
+- Convolutional neural network (CNN)
+- Bidirectional long-short term memory (BI-LSTM)
 
 Hybrid supports:
 
-- CNN-LSTM
-- CNN-BI-LSTM
+- Convolutional neural network + Long short-term memory (CNN-LSTM)
+- Convolutional neural network + Bidirectional long-short term memory (CNN-BI-LSTM)
 
-Please note that each model is supported by a prior input data pre-processing procedure which allows to set how many datapoints should look a model look back for a prediction, how many datapoints should be predicted into the future, how many subsequences should be considered (only for hybrid architectures) and what scaling should be applied.
+Please note that each model is supported by a prior input data pre-processing procedure which allows to set how many datapoints should look a model look back for a prediction, how many datapoints should be predicted into the future, how many sub-sequences should be considered (only for hybrid architectures) and what scaling should be applied.
 
 The following scikit-learn scaling procedures are supported:
 
