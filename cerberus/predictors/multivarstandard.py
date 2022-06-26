@@ -14,7 +14,7 @@ import os
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, GRU
 
 
 class BasicMultStepVar(MultiVariateMultiStep):
@@ -243,6 +243,20 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
+    def create_gru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates GRU model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(GRU(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(GRU(50, activation='relu', return_sequences=True))
+        self.model.add(GRU(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
     def create_cnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
@@ -260,7 +274,7 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
     def create_bilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
-        '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''Creates a bidirectional GRU model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional LSTM')
         self.loss = loss
@@ -269,6 +283,19 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model = keras.Sequential()
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
         self.model.add(LSTM(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
+
+    def create_bigru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''
+        self.set_model_id('Bidirectional GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(Bidirectional(GRU(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(GRU(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
@@ -336,24 +363,3 @@ class BasicMultStepVar(MultiVariateMultiStep):
                 location (str): Path of keras model location
         '''
         self.model = keras.models.load_model(location)
-
-def pred_input(stockdatapred: DataFrame, steps_past: int, target: str, steps_future: int = 0) -> [(array, DataFrame)]:
-    '''Helper function to prepare data input to enable model to make future predictions. Furthermore, provides real values.
-        Parameters:
-            stockdatapred (DataFrame): DataFrame containing all features that shall be considered for predicting the future including the target feature.
-            steps_past (int): How much the model needs to look back to make a prediction.
-            target (str): Target variable name.
-            steps_future (int): Default to 0 but can be any number of steps into the future.
-
-        Returns:
-            X (array): Array containing data the model uses to predict into the future.
-            realvalues (DataFrame): DataFrame containing real values.
-    '''
-    realvalues = stockdatapred[target]
-    stockdatapred = stockdatapred.drop(target, axis=1)
-    stockdatapred = stockdatapred.iloc[0:steps_past]
-    realvalues = realvalues.iloc[steps_past:steps_past+steps_future]
-    X = []
-    for i in range(len(stockdatapred)):
-        X.append(list(stockdatapred.iloc[i]))
-    return array(X), pd.DataFrame(realvalues)
