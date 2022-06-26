@@ -32,6 +32,7 @@ Standard supports the following architectures:
 - Long short-term memory (LSTM)
 - Convolutional neural network (CNN)
 - Bidirectional long-short term memory (BI-LSTM)
+- Encoder-Decoder long-short term memory (supported in Univariate-Multistep class)
 
 Hybrid supports:
 
