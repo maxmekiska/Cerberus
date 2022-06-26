@@ -13,7 +13,7 @@ import os
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, RepeatVector, TimeDistributed
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, RepeatVector, TimeDistributed, GRU
 
 class BasicMultStepUniVar(UniVariateMultiStep):
     '''Implements neural network based univariate multipstep predictors.
@@ -219,6 +219,20 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
+    def create_gru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates GRU model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(GRU(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], 1)))
+        self.model.add(GRU(50, activation='relu', return_sequences=True))
+        self.model.add(GRU(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
     def create_cnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
@@ -245,6 +259,19 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model = keras.Sequential()
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], 1)))
         self.model.add(LSTM(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    def create_bigru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates a bidirectional GRU model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''
+        self.set_model_id('Bidirectional GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(Bidirectional(GRU(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], 1)))
+        self.model.add(GRU(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
