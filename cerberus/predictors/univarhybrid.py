@@ -15,7 +15,7 @@ import os
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, TimeDistributed
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, TimeDistributed, GRU
 
 class HybridMultStepUniVar(UniVariateMultiStep):
     '''Implements neural network based univariate multipstep hybrid predictors.
@@ -195,7 +195,23 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-# Experimental model
+    def create_cnngru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates CNN-GRU hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('CNN-GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
+        self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+        self.model.add(TimeDistributed(Flatten()))
+        self.model.add(GRU(50, activation='relu', return_sequences=True))
+        self.model.add(GRU(25, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
     def create_cnnbilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates CNN-Bidirectional-LSTM hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
@@ -210,6 +226,23 @@ class HybridMultStepUniVar(UniVariateMultiStep):
         self.model.add(TimeDistributed(Flatten()))
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True)))
         self.model.add(LSTM(25, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    def create_cnnbigru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates CNN-Bidirectional-GRU hybrid model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('CNN-Bi-GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'), input_shape=(None,self.modified_back, 1)))
+        self.model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu')))
+        self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+        self.model.add(TimeDistributed(Flatten()))
+        self.model.add(Bidirectional(GRU(50, activation='relu', return_sequences=True)))
+        self.model.add(GRU(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
