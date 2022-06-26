@@ -188,23 +188,6 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-    def create_encdec_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
-        '''Creates Encoder-Decoder LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
-        '''
-        self.set_model_id('Encoder-Decoder-LSTM')
-        self.loss = loss
-        self.metrics = metrics
-
-        self.model = keras.Sequential()
-        self.model.add(LSTM(100, activation='relu', return_sequences = True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
-        self.model.add(LSTM(50, activation='relu'))
-        self.model.add(RepeatVector(self.input_y.shape[1]))
-        self.model.add(LSTM(50, activation='relu', return_sequences = True))
-        self.model.add(LSTM(100, activation='relu', return_sequences=True))
-        self.model.add(TimeDistributed(Dense(self.input_x.shape[2])))
-        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-
-
     def create_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
@@ -273,6 +256,38 @@ class BasicMultStepUniVar(UniVariateMultiStep):
         self.model.add(Bidirectional(GRU(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], 1)))
         self.model.add(GRU(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    def create_encdec_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates Encoder-Decoder LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('Encoder-Decoder-LSTM')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(LSTM(100, activation='relu', return_sequences = True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(LSTM(50, activation='relu'))
+        self.model.add(RepeatVector(self.input_y.shape[1]))
+        self.model.add(LSTM(50, activation='relu', return_sequences = True))
+        self.model.add(LSTM(100, activation='relu', return_sequences=True))
+        self.model.add(TimeDistributed(Dense(self.input_x.shape[2])))
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    def create_encdec_gru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates Encoder-Decoder GRU model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('Encoder-Decoder-GRU')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(GRU(100, activation='relu', return_sequences = True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(GRU(50, activation='relu'))
+        self.model.add(RepeatVector(self.input_y.shape[1]))
+        self.model.add(GRU(50, activation='relu', return_sequences = True))
+        self.model.add(GRU(100, activation='relu', return_sequences=True))
+        self.model.add(TimeDistributed(Dense(self.input_x.shape[2])))
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
