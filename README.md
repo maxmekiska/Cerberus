@@ -71,14 +71,14 @@ predictor = BasicMultStepUniVar(steps_past: int, steps_future: int, data = pd.Da
 
 # Choose between one of the architectures:
 
-# predictor.create_mlp(optimizer: str = 'adam')
-# predictor.create_lstm(optimizer: str = 'adam')
-# predictor.create_gru(optimizer: str = 'adam')
-# predictor.create_cnn(optimizer: str = 'adam')
-# predictor.create_bilstm(optimizer: str = 'adam')
-# predictor.create_bigru(optimizer: str = 'adam')
-# predictor.create_encdec_lstm(optimizer: str = 'adam')
-# predictor.create_encdec_gru(optimizer: str = 'adam')
+# predictor.create_mlp(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_bilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_bigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_encdec_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_encdec_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
 predictor.fit_model(epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10)
@@ -112,10 +112,10 @@ predictor = HybridMultStepUniVar(sub_seq: int, steps_past: int, steps_future: in
 
 # Choose between one of the architectures:
 
-# predictor.create_cnnlstm(optimizer: str = 'adam')
-# predictor.create_cnnbilstm(optimizer: str = 'adam')
-# predictor.create_cnngru(optimizer: str = 'adam')
-# predictor.create_cnnbigru(optimizer: str = 'adam')
+# predictor.create_cnnlstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnngru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
 predictor.fit_model(epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10)
@@ -152,12 +152,12 @@ predictor = BasicMultStepVar(steps_past: int, steps_future: int, data = pd.DataF
 
 # Choose between one of the architectures:
 
-# predictor.create_mlp(optimizer: str = 'adam')
-# predictor.create_lstm(optimizer: str = 'adam')
-# predictor.create_gru(optimizer: str = 'adam')
-# predictor.create_cnn(optimizer: str = 'adam')
-# predictor.create_bilstm(optimizer: str = 'adam')
-# predictor.create_bigru(optimizer: str = 'adam')
+# predictor.create_mlp(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_bilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_bigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
 predictor.fit_model(epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10)
@@ -191,10 +191,10 @@ predictor = HybridMultStepVar(sub_seq: int, steps_past: int, steps_future: int, 
 
 # Choose between one of the architectures:
 
-# predictor.create_cnnlstm(optimizer: str = 'adam')
-# predictor.create_cnnbilstm(optimizer: str = 'adam')
-# predictor.create_cnngru(optimizer: str = 'adam')
-# predictor.create_cnnbigru(optimizer: str = 'adam')
+# predictor.create_cnnlstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnngru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
 predictor.fit_model(epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10)
