@@ -30,8 +30,10 @@ Standard supports the following architectures:
 
 - Multilayer Perceptron (MLP)
 - Long short-term memory (LSTM)
+- Gated recurrent unit (GRU)
 - Convolutional neural network (CNN)
 - Bidirectional long-short term memory (BI-LSTM)
+- Bidirectional gated recurrent unit (BI-GRU)
 - Encoder-Decoder long-short term memory (supported in Univariate-Multistep class)
 
 Hybrid supports:
