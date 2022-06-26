@@ -63,6 +63,8 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.scaler = self._scaling(scale)
 
         self.model_id = '' # to identify model (example: name)
+        self.loss = ''
+        self.metrics = ''
 
 
         if len(data) > 0:
@@ -197,10 +199,24 @@ class BasicMultStepVar(MultiVariateMultiStep):
         '''
         return self.input_y.shape
 
-    def create_mlp(self, optimizer: str = 'adam'):
+    @property
+    def get_loss(self) -> str:
+        '''Get loss function.
+        '''
+        return self.loss
+
+    @property
+    def get_metrics(self) -> str:
+        '''Get metrics.
+        '''
+        return self.metrics
+
+    def create_mlp(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates MLP model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('MLP')
+        self.loss = loss
+        self.metrics = metrics
 
         self.dimension = (self.input_x.shape[1] * self.input_x.shape[2])
 
@@ -211,24 +227,28 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(25, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
-    def create_lstm(self, optimizer: str = 'adam'):
+    def create_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(LSTM(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
         self.model.add(LSTM(50, activation='relu', return_sequences=True))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
-    def create_cnn(self, optimizer: str = 'adam'):
+    def create_cnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates the CNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
         self.set_model_id('CNN')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(Conv1D(filters=64, kernel_size=1, activation='relu', input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
@@ -237,18 +257,20 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.add(Flatten())
         self.model.add(Dense(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
-    def create_bilstm(self, optimizer: str = 'adam'):
+    def create_bilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional LSTM')
+        self.loss = loss
+        self.metrics = metrics
 
         self.model = keras.Sequential()
         self.model.add(Bidirectional(LSTM(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
         self.model.add(LSTM(50, activation='relu'))
         self.model.add(Dense(self.input_y.shape[1]))
-        self.model.compile(optimizer= optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
     def fit_model(self, epochs: int, show_progress: int = 1, validation_split: float = 0.20, batch_size: int = 10):
         '''Trains the model on data provided. Performs validation.
@@ -273,7 +295,7 @@ class BasicMultStepVar(MultiVariateMultiStep):
         plt.plot(information.history['loss'])
         plt.plot(information.history['val_loss'])
         plt.title(self.model_id + ' Model Loss')
-        plt.ylabel('MSE')
+        plt.ylabel(self.loss)
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper right')
         plt.tight_layout()
@@ -314,3 +336,24 @@ class BasicMultStepVar(MultiVariateMultiStep):
                 location (str): Path of keras model location
         '''
         self.model = keras.models.load_model(location)
+
+def pred_input(stockdatapred: DataFrame, steps_past: int, target: str, steps_future: int = 0) -> [(array, DataFrame)]:
+    '''Helper function to prepare data input to enable model to make future predictions. Furthermore, provides real values.
+        Parameters:
+            stockdatapred (DataFrame): DataFrame containing all features that shall be considered for predicting the future including the target feature.
+            steps_past (int): How much the model needs to look back to make a prediction.
+            target (str): Target variable name.
+            steps_future (int): Default to 0 but can be any number of steps into the future.
+
+        Returns:
+            X (array): Array containing data the model uses to predict into the future.
+            realvalues (DataFrame): DataFrame containing real values.
+    '''
+    realvalues = stockdatapred[target]
+    stockdatapred = stockdatapred.drop(target, axis=1)
+    stockdatapred = stockdatapred.iloc[0:steps_past]
+    realvalues = realvalues.iloc[steps_past:steps_past+steps_future]
+    X = []
+    for i in range(len(stockdatapred)):
+        X.append(list(stockdatapred.iloc[i]))
+    return array(X), pd.DataFrame(realvalues)
