@@ -15,5 +15,11 @@ setup(
         "numpy==1.21.6",
         "pandas==0.25.1",
     ],
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: MIT License",
+        "Operating System :: Microsoft :: Windows 10",
+    ],
+    keywords = ["machineleaning", "keras", "deeplearning", "timeseries", "forecasting"],
     python_rquieres=">=3.7"
 )
