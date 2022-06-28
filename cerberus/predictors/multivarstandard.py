@@ -14,7 +14,7 @@ import os
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, GRU
+from tensorflow.keras.layers import LSTM, Dense, Flatten, Conv1D, MaxPooling1D, Dropout, Bidirectional, GRU, SimpleRNN
 
 
 class BasicMultStepVar(MultiVariateMultiStep):
@@ -229,6 +229,20 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
+    def create_rnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates RNN model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
+        '''
+        self.set_model_id('RNN')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(SimpleRNN(40, activation='relu', return_sequences=True, input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(SimpleRNN(50, activation='relu', return_sequences=True))
+        self.model.add(SimpleRNN(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
+
     def create_lstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
         '''Creates LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation metrics.
         '''
@@ -273,8 +287,21 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.add(Dense(self.input_y.shape[1]))
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
+    def create_birnn(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
+        '''Creates a bidirectional RNN model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''
+        self.set_model_id('Bidirectional RNN')
+        self.loss = loss
+        self.metrics = metrics
+
+        self.model = keras.Sequential()
+        self.model.add(Bidirectional(SimpleRNN(50, activation='relu', return_sequences=True), input_shape=(self.input_x.shape[1], self.input_x.shape[2])))
+        self.model.add(SimpleRNN(50, activation='relu'))
+        self.model.add(Dense(self.input_y.shape[1]))
+        self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
+
     def create_bilstm(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
-        '''Creates a bidirectional GRU model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional LSTM')
         self.loss = loss
@@ -287,7 +314,7 @@ class BasicMultStepVar(MultiVariateMultiStep):
         self.model.compile(optimizer= optimizer, loss=loss, metrics=metrics)
 
     def create_bigru(self, optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error'):
-        '''Creates a bidirectional LSTM model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
+        '''Creates a bidirectional GRU model by defining all layers with activation functions, optimizer, loss function and evaluation matrics.
         '''
         self.set_model_id('Bidirectional GRU')
         self.loss = loss
