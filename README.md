@@ -28,12 +28,15 @@ These two main modes are further divided based on the complexity of the underlyi
 
 Standard supports the following architectures:
 
-- Multilayer Perceptron (MLP)
+- Multilayer perceptron (MLP)
+- Recurrent neural network (RNN)
 - Long short-term memory (LSTM)
 - Gated recurrent unit (GRU)
 - Convolutional neural network (CNN)
+- Bidirectional recurrent neural network (BI-RNN)
 - Bidirectional long-short term memory (BI-LSTM)
 - Bidirectional gated recurrent unit (BI-GRU)
+- Encoder-Decoder recurrent neural network (supported in Univariate-Multistep class)
 - Encoder-Decoder long-short term memory (supported in Univariate-Multistep class)
 - Encoder-Decoder gated recurrent unit (supported in Univariate-Multistep class)
 
@@ -41,6 +44,7 @@ Hybrid supports:
 
 - Convolutional neural network + Long short-term memory (CNN-LSTM)
 - Convolutional neural network + Gated recurrent unit (CNN-GRU)
+- Convolutional neural network + Bidirectional recurrent neural network (CNN-BI-RNN)
 - Convolutional neural network + Bidirectional long-short term memory (CNN-BI-LSTM)
 - Convolutional neural network + Bidirectional gated recurrent unit (CNN-BI-GRU)
 
@@ -72,11 +76,14 @@ predictor = BasicMultStepUniVar(steps_past: int, steps_future: int, data = pd.Da
 # Choose between one of the architectures:
 
 # predictor.create_mlp(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_rnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_birnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_bilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_bigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_encdec_rnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_encdec_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_encdec_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
@@ -112,9 +119,11 @@ predictor = HybridMultStepUniVar(sub_seq: int, steps_past: int, steps_future: in
 
 # Choose between one of the architectures:
 
+# predictor.create_cnnrnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnnlstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
-# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnngru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbirnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnnbigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
@@ -153,9 +162,11 @@ predictor = BasicMultStepVar(steps_past: int, steps_future: int, data = pd.DataF
 # Choose between one of the architectures:
 
 # predictor.create_mlp(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_rnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_lstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_gru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_birnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_bilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_bigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
@@ -191,9 +202,11 @@ predictor = HybridMultStepVar(sub_seq: int, steps_past: int, steps_future: int, 
 
 # Choose between one of the architectures:
 
+# predictor.create_cnnrnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnnlstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
-# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnngru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbirnn(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
+# predictor.create_cnnbilstm(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 # predictor.create_cnnbigru(optimizer: str = 'adam', loss: str = 'mean_squared_error', metrics: str = 'mean_squared_error')
 
 # Fit the predictor object
